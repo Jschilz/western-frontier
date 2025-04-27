@@ -2,107 +2,93 @@ using UnityEditor;
 using UnityEngine;
 using System.IO;
 
-/// <summary>
-/// Editor utility to create the full folder structure for the Surviving The West project.
-/// Adds a menu item under CCS/Tools/ProjectFolders.
-/// </summary>
-public static class ProjectFoldersWizard
+namespace CCS.Editor.Tools
 {
-    private static readonly string[] folders = new string[]
-    {
-        "Art/Characters",
-        "Art/Environments",
-        "Art/Props",
-        "Art/UI",
-        "Art/Animals",
-        "Art/Weapons",
-        "Art/VFX",
-        "Audio/Music",
-        "Audio/SFX",
-        "Audio/Voice",
-        "Data/ScriptableObjects",
-        "Data/Databases",
-        "Data/Localization",
-        "Documentation",
-        "Editor/CCS",
-        "Materials",
-        "Networking/Netcode",
-        "Networking/MultiplayerTools",
-        "Networking/Server",
-        "Physics",
-        "Plugins",
-        "Prefabs/Characters",
-        "Prefabs/Animals",
-        "Prefabs/Buildings",
-        "Prefabs/Items",
-        "Prefabs/Vehicles",
-        "Prefabs/UI",
-        "Resources",
-        "Scenes/Main",
-        "Scenes/Towns",
-        "Scenes/Wilderness",
-        "Scenes/Test",
-        "Scripts/AI",
-        "Scripts/Audio",
-        "Scripts/Camera",
-        "Scripts/Combat",
-        "Scripts/Core",
-        "Scripts/Crafting",
-        "Scripts/Economy",
-        "Scripts/Environment",
-        "Scripts/Input",
-        "Scripts/Inventory",
-        "Scripts/NPC",
-        "Scripts/Networking",
-        "Scripts/Player",
-        "Scripts/Progression",
-        "Scripts/UI",
-        "Scripts/Utilities",
-        "Settings",
-        "Shaders",
-        "StreamingAssets",
-        "Tests/PlayMode",
-        "Tests/EditMode"
-    };
-
-    [MenuItem("CCS/Tools/ProjectFolders")]
-    public static void CreateProjectFolders()
-    {
-        string root = "Assets/CCS";
-        if (!AssetDatabase.IsValidFolder(root))
-        {
-            AssetDatabase.CreateFolder("Assets", "CCS");
-            Debug.Log($"Created folder: {root}");
-        }
-
-        foreach (var folder in folders)
-        {
-            var fullPath = Path.Combine(root, folder).Replace("\\", "/");
-            if (!AssetDatabase.IsValidFolder(fullPath))
-            {
-                CreateFolderRecursively(fullPath);
-                Debug.Log($"Created folder: {fullPath}");
-            }
-        }
-        AssetDatabase.Refresh();
-        EditorUtility.DisplayDialog("Project Folders Created", "All required CCS project folders have been created!", "OK");
-    }
-
     /// <summary>
-    /// Recursively creates folders if they do not exist.
+    /// Editor utility to reset and create a simplified folder structure for the Surviving The West project.
+    /// Adds a menu item under CCS/Tools/ProjectFolders.
+    ///
+    /// Author: James Schilz
+    /// Date Created: 4/27/2025
+    /// Property of: Crazy Carrot Studios
     /// </summary>
-    private static void CreateFolderRecursively(string fullPath)
+    public static class ProjectFoldersWizard
     {
-        string[] parts = fullPath.Split('/');
-        string current = parts[0];
-        for (int i = 1; i < parts.Length; i++)
+        private static readonly string[] folders = new string[]
         {
-            string next = Path.Combine(current, parts[i]);
-            if (!AssetDatabase.IsValidFolder(next))
+            "Art",
+            "Audio",
+            "Data",
+            "Documentation",
+            "Editor/CCS/Tools", // Wizards live here
+            "Materials",
+            "Networking",
+            "Physics",
+            "Plugins",
+            "Prefabs",
+            "Resources",
+            "Scenes",
+            "Scripts/Managers",
+            "Scripts/Player",
+            "Scripts/Inventory",
+            "Scripts/Crafting",
+            "Settings",
+            "Shaders",
+            "StreamingAssets",
+            "Tests/PlayMode",
+            "Tests/EditMode"
+        };
+
+        [MenuItem("CCS/Tools/ProjectFolders")]
+        public static void CreateProjectFolders()
+        {
+            string root = "Assets/CCS";
+            // 1. Delete all folders under Assets/CCS except Editor/CCS/Tools
+            if (Directory.Exists(root))
             {
-                AssetDatabase.CreateFolder(current, parts[i]);
+                foreach (var dir in Directory.GetDirectories(root))
+                {
+                    // Skip Editor/CCS/Tools to preserve wizards
+                    string dirNorm = dir.Replace("\\", "/");
+                    if (!dirNorm.EndsWith("Editor/CCS/Tools") && !dirNorm.EndsWith("Editor") && !dirNorm.EndsWith("Editor/CCS"))
+                    {
+                        FileUtil.DeleteFileOrDirectory(dir);
+                        Debug.Log($"Deleted folder: {dir}");
+                    }
+                }
             }
-            current = next;
+            AssetDatabase.Refresh();
+
+            // 2. Create new folder structure
+            if (!AssetDatabase.IsValidFolder(root))
+            {
+                AssetDatabase.CreateFolder("Assets", "CCS");
+            }
+            foreach (var folder in folders)
+            {
+                var fullPath = Path.Combine(root, folder).Replace("\\", "/");
+                CreateFolderRecursively(fullPath);
+            }
+            AssetDatabase.Refresh();
+            EditorUtility.DisplayDialog("Project Folders Created", "Simplified CCS project folders have been created!", "OK");
+        }
+
+        /// <summary>
+        /// Recursively creates folders if they do not exist.
+        /// </summary>
+        private static void CreateFolderRecursively(string fullPath)
+        {
+            string[] parts = fullPath.Split('/');
+            string current = parts[0];
+            for (int i = 1; i < parts.Length; i++)
+            {
+                string next = Path.Combine(current, parts[i]).Replace("\\", "/");
+                if (!AssetDatabase.IsValidFolder(next))
+                {
+                    AssetDatabase.CreateFolder(current, parts[i]);
+                }
+                current = next;
+            }
         }
     }
 } 
