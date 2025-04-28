@@ -17,9 +17,6 @@ namespace CCS.Managers
         [Header("Game Settings")]
         [Tooltip("Initial player lives.")]
         [SerializeField] private int initialPlayerLives = 3;
-
-        [Tooltip("Enable debug mode for extra logging.")]
-        [SerializeField] private bool debugMode = false;
         #endregion
 
         #region Events
@@ -47,8 +44,6 @@ namespace CCS.Managers
         {
             PlayerLives = initialPlayerLives;
             SetGameState(GameState.MainMenu);
-            if (debugMode)
-                Debug.Log("GameManager initialized.");
         }
         #endregion
 
@@ -58,8 +53,6 @@ namespace CCS.Managers
             if (CurrentState == newState) return;
             CurrentState = newState;
             OnGameStateChanged?.Invoke(newState);
-            if (debugMode)
-                Debug.Log($"Game state changed to: {newState}");
         }
         #endregion
     }

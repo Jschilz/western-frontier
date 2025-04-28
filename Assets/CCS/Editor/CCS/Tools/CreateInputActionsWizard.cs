@@ -50,6 +50,10 @@ namespace CCS.Editor.Tools
             var look = playerMap.AddAction("Look", InputActionType.Value);
             look.AddBinding("<Mouse>/delta");
             look.AddBinding("<Gamepad>/rightStick");
+            // Zoom: Mouse scroll wheel + Gamepad right stick Y
+            var zoom = playerMap.AddAction("Zoom", InputActionType.Value);
+            zoom.AddBinding("<Mouse>/scroll/y");
+            zoom.AddBinding("<Gamepad>/rightStick/y");
             // Jump
             var jump = playerMap.AddAction("Jump", InputActionType.Button);
             jump.AddBinding("<Keyboard>/space");

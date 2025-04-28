@@ -13,6 +13,7 @@ namespace CCS.Utilities
     public abstract class MonoSingleton<T> : MonoBehaviour where T : MonoSingleton<T>
     {
         private static T _instance;
+        private static bool applicationIsQuitting = false;
 
         public static T Instance
         {
@@ -21,7 +22,7 @@ namespace CCS.Utilities
                 if (_instance == null)
                 {
                     _instance = FindObjectOfType<T>();
-                    if (_instance == null)
+                    if (_instance == null && !applicationIsQuitting)
                     {
                         Debug.LogWarning($"The singleton of type {typeof(T)} is NULL.");
                     }
@@ -47,5 +48,10 @@ namespace CCS.Utilities
         /// Optional override for initialization logic in derived classes.
         /// </summary>
         public virtual void Initialization() { }
+
+        protected virtual void OnApplicationQuit()
+        {
+            applicationIsQuitting = true;
+        }
     }
 } 
